@@ -1,5 +1,10 @@
 # change WG_HOST in docker-compose.yml
 
+- need to do this to stop systemd-resolve from listening on port 53 
+    - https://unix.stackexchange.com/questions/676942/free-up-port-53-on-ubuntu-so-costom-dns-server-can-use-it
+
+- install docker 
+
 '''bash
     docker compose up -d
 '''
@@ -19,8 +24,3 @@ wireguard
 
     cp /etc/nginx/servers/wg-easy.conf /etc/nginx/conf.d/. ; certbot --nginx --non-interactive --agree-tos -m webmaster@google.com -d summry.me ; nginx -s reload
     ```
-
-
-
-# docker compose down ; docker rmi -f $(docker images -aq)
-#  docker compose up -d ; sudo netstat -lntp
