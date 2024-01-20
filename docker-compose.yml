@@ -9,15 +9,15 @@ services:
       - "53:53/tcp"
       - "53:53/udp"
       # - "67:67/udp" # Only required if you are using Pi-hole as your DHCP server
-      - "80:80/tcp"
+      - "8080:80/tcp"
     environment:
       TZ: 'America/New_York'
       WEBPASSWORD: 'password'
       PIHOLE_DNS_: 172.21.200.3#53 # forward to unbound
     # Volumes store your data between container upgrades
     volumes:
-      - '/etc/pihole:/etc/pihole'
-      - '/etc/pihole/dnsmasq.d:/etc/dnsmasq.d'
+      - './etc-pihole:/etc/pihole'
+      - './etc-pihole/dnsmasq.d:/etc/dnsmasq.d'
     #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
     # cap_add:
     #   - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
@@ -43,7 +43,7 @@ services:
       environment:
         # ⚠️ Required:
         # Change this to your host's public address
-        - WG_HOST=34.237.12.16
+        - WG_HOST=summry.me
 
         # Optional:
         # - PASSWORD=foobar123
@@ -77,6 +77,22 @@ services:
         pihole_dns_network:
           ipv4_address: 172.21.200.4 # <-- use this ip as dns when connected to pihole_dns_network (i.e. within a docker network)
 
+
+  nginx:
+    image: weejewel/nginx-with-certbot
+    container_name: nginx
+    hostname: nginx
+    volumes:
+      - ./.nginx/servers/:/etc/nginx/servers/
+      - ./.nginx/letsencrypt/:/etc/letsencrypt/
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+    restart: unless-stopped
+
+    networks:
+      pihole_dns_network:
+        ipv4_address: 172.21.200.5 # <-- use this ip as dns when connected to pihole_dns_network (i.e. within a docker network)
 
 
 

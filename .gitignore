@@ -1,1 +1,9 @@
 etc_wireguard
+etc-pihole
+etc-lighttpd
+
+
+/.nginx/*
+!/.nginx/servers/
+!/.nginx/servers/*
+!/.nginx/servers/wg-easy.conf
