@@ -11,7 +11,8 @@ function install_dependencies()
 {
     sudo apt install vim -y
     sudo apt install sqlite3 -y
-    sudo apt-get install dnsutils -y # nslookup, dig, etc.
+    sudo apt install dnsutils -y # nslookup, dig, etc.
+    sudo apt install net-tools -y # netstat, etc.
 }
 
 
