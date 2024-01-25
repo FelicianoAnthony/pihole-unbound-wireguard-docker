@@ -1,26 +1,74 @@
-# change WG_HOST in docker-compose.yml
+# Wireguard-Pihole-Unbound-Docker
 
-- need to do this to stop systemd-resolve from listening on port 53 
-    - https://unix.stackexchange.com/questions/676942/free-up-port-53-on-ubuntu-so-costom-dns-server-can-use-it
-
-- install docker 
-
-'''bash
-    docker compose up -d
-'''
-
-pihole 
-    `http://summry.me:8080/admin`
-
-wireguard
-    `https://summry.me`
+```bash
+./install_docker.sh
+```
+* update & upgrade system packages
+* install dns/network packages
+* install docker & add current user to docker group
 
 
-[Run Wireguard behind nginx with SSL](https://github.com/wg-easy/wg-easy/wiki/Using-WireGuard-Easy-with-nginx-SSL ):
+```bash
+./update_dns_config.sh
+```
+* EC2 has a process that listens on port 53 but that's needed for pihole, stop it.
 
-1. run certbot inside container 
-    ```bash
-    docker exec -it nginx /bin/sh
 
-    cp /etc/nginx/servers/wg-easy.conf /etc/nginx/conf.d/. ; certbot --nginx --non-interactive --agree-tos -m webmaster@google.com -d summry.me ; nginx -s reload
-    ```
+```bash
+sudo reboot
+```
+* restart so changes take effect
+
+
+```bash
+vim .env
+```
+* change variables in .env file which are used in docker-compose.yml
+
+```bash
+./start_containers
+```
+* calls `docker-compose.yml` with the following containers communicating on a macvlan network
+    1. wireguard
+        * UI runs on port 51821
+            * nginx reverse proxy listens on `0.0.0.0` & forwards to `localhost:51821`
+            * https://summry.me
+        * VPN runs on port 51820
+
+    2. pihole
+        * UI on port 8080
+            * `http://summry.me:8080/admin`
+        * DNS on port 53
+
+    3. unbound 
+        * port 5335
+
+    4. nginx
+        * run certbot inside nginx container to add certs to wireguard UI. pihole cant run on localhost?
+            ```bash
+            docker exec -it nginx /bin/sh
+
+            cp /etc/nginx/servers/wg-easy.conf /etc/nginx/conf.d/. ; certbot --nginx --non-interactive --agree-tos -m webmaster@google.com -d summry.me ; nginx -s reload
+            ```
+* the only ports exposed to the internet in the container
+    * TCP 
+        80
+        443
+    * UDP
+        * 51820
+
+```bash
+./stop_containters
+```
+* stops containers and DELETES ALL IMAGES
+
+    
+
+---
+[Run Wireguard behind nginx with SSL](https://github.com/wg-easy/wg-easy/wiki/Using-WireGuard-Easy-with-nginx-SSL)
+
+
+#### Commands
+--- 
+- check if connection to UDP port can be established 
+    netcat -u -z -v localhost 51820
